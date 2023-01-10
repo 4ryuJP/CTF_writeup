@@ -1,0 +1,102 @@
+dream_heap
+    Arch:     amd64-64-little
+    RELRO:    Partial RELRO
+    Stack:    Canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x400000)
+
+info file
+
+
+heap_ptr = newdreamで入力したアドレスを保持？
+
+read_Dreamで-4入力するとstdoutが見れる
+0x602080 <stdout@@GLIBC_2.2.5>: 0xf7fb86a0      0x00007fff
+
+edit_dreamはSIZESから入力の長さをとっている
+
+
+0x602080 <stdout@@GLIBC_2.2.5>: 0xf7fb86a0      0x00007fff      0x00000000      0x00000000
+0x602090:                       0x00000000      0x00000000      0x00000000      0x00000000
+0x6020a0 <HEAP_PTRS>:           0x00000000      0x00000000      0x00000000      0x00000000
+0x6020b0 <HEAP_PTRS+16>:        0x00000000      0x00000000      0x00000000      0x00000000
+0x6020c0 <HEAP_PTRS+32>:        0x00000000      0x00000000      0x00000000      0x00000000
+0x6020d0 <HEAP_PTRS+48>:        0x00000000      0x00000000      0x00000000      0x00000000
+0x6020e0 <SIZES>:               0x00000000      0x00000000      0x00000000      0x00000000
+0x6020f0 <SIZES+16>:            0x00000000      0x00000000      0x00000000      0x00000000
+0x602100:                       0x00000000      0x00000000      0x00000000      0x00000000
+
+
+new_dream 1回目 入力「hello\n」 文字数:10(0xa)
+0x602080 <stdout@@GLIBC_2.2.5>: 0xf7fb86a0      0x00007fff      0x00000000      0x00000001
+0x602090:                       0x00000000      0x00000000      0x00000000      0x00000000
+0x6020a0 <HEAP_PTRS>:           0x006036b0      0x00000000      0x00000000      0x00000000
+0x6020b0 <HEAP_PTRS+16>:        0x00000000      0x00000000      0x00000000      0x00000000
+0x6020c0 <HEAP_PTRS+32>:        0x00000000      0x00000000      0x00000000      0x00000000
+0x6020d0 <HEAP_PTRS+48>:        0x00000000      0x00000000      0x00000000      0x00000000
+0x6020e0 <SIZES>:               0x0000000a      0x00000000      0x00000000      0x00000000
+0x6020f0 <SIZES+16>:            0x00000000      0x00000000      0x00000000      0x00000000
+0x602100:                       0x00000000      0x00000000      0x00000000      0x00000000
+0x602110:                       0x00000000      0x00000000      0x00000000      0x00000000
+
+          2回目入力「hacking\n」 文字数:20(0x14)
+0x602080 <stdout@@GLIBC_2.2.5>: 0xf7fb86a0      0x00007fff      0x00000000      0x00000002
+0x602090:                       0x00000000      0x00000000      0x00000000      0x00000000
+0x6020a0 <HEAP_PTRS>:           0x006036b0      0x00000000      0x006036d0      0x00000000
+0x6020b0 <HEAP_PTRS+16>:        0x00000000      0x00000000      0x00000000      0x00000000
+0x6020c0 <HEAP_PTRS+32>:        0x00000000      0x00000000      0x00000000      0x00000000
+0x6020d0 <HEAP_PTRS+48>:        0x00000000      0x00000000      0x00000000      0x00000000
+0x6020e0 <SIZES>:               0x0000000a      0x00000014      0x00000000      0x00000000
+0x6020f0 <SIZES+16>:            0x00000000      0x00000000      0x00000000      0x00000000
+0x602100:                       0x00000000      0x00000000      0x00000000      0x00000000
+
+
+検証 明らかに9回目以降になるとSIZえ書き換えそうだけど
+0x602080 <stdout@@GLIBC_2.2.5>: 0x5aceb6a0      0x00007f02      0x00000000      0x00000008
+0x602090:       			  0x00000000      0x00000000      0x00000000      0x00000000
+0x6020a0 <HEAP_PTRS>:   	  0x01e752b0      0x00000000      0x01e752d0      0x00000000
+0x6020b0 <HEAP_PTRS+16>:        0x01e752f0      0x00000000      0x01e75310      0x00000000
+0x6020c0 <HEAP_PTRS+32>:        0x01e75330      0x00000000      0x01e75350      0x00000000
+0x6020d0 <HEAP_PTRS+48>:        0x01e75370      0x00000000      0x01e75390      0x00000000
+0x6020e0 <SIZES>:       	  0x0000000a      0x0000000a      0x0000000a      0x0000000a
+0x6020f0 <SIZES+16>:    	    0x0000000a      0x0000000a      0x0000000a      0x0000000a
+
+9回目 SIZEを書き換えてしまっている
+0x602080 <stdout@@GLIBC_2.2.5>: 0x5aceb6a0      0x00007f02      0x00000000      0x00000009
+0x602090:       			    0x00000000      0x00000000      0x00000000      0x00000000
+0x6020a0 <HEAP_PTRS>:   	  0x01e752b0      0x00000000      0x01e752d0      0x00000000
+0x6020b0 <HEAP_PTRS+16>:        0x01e752f0      0x00000000      0x01e75310      0x00000000
+0x6020c0 <HEAP_PTRS+32>:        0x01e75330      0x00000000      0x01e75350      0x00000000
+0x6020d0 <HEAP_PTRS+48>:        0x01e75370      0x00000000      0x01e75390      0x00000000
+0x6020e0 <SIZES>:       	    0x01e753b0      0x00000000      0x0000000a      0x0000000a
+0x6020f0 <SIZES+16>:    	  0x0000000a      0x0000000a      0x0000000a      0x0000000a
+0x602100:       			  0x0000000a      0x00000000      0x00000000      0x00000000
+
+search-patternはその文字列?を保持しているアドレスを探す
+run前にputsをgdbで見る
+$1 = {<text variable, no debug info>} 0x400650 <puts@plt>
+run後
+$2 = {int (const char *)} 0x7ffff7e4f420 <__GI__IO_puts>
+
+0x007ffff7dcb000 0x007ffff7ded000 0x00000000000000 r-- /usr/lib/x86_64-linux-gnu/libc-2.31.so
+0x007ffff7ded000 0x007ffff7f65000 0x00000000022000 r-x /usr/lib/x86_64-linux-gnu/libc-2.31.so ←このあたり
+0x007ffff7f65000 0x007ffff7fb3000 0x0000000019a000 r-- /usr/lib/x86_64-linux-gnu/libc-2.31.so
+0x007ffff7fb3000 0x007ffff7fb7000 0x000000001e7000 r-- /usr/lib/x86_64-linux-gnu/libc-2.31.so
+0x007ffff7fb7000 0x007ffff7fb9000 0x000000001eb000 rw- /usr/lib/x86_64-linux-gnu/libc-2.31.so
+
+当たり前かもしれないけどputsを実行した後じゃないと表示されない
+putsのアドレスを探すとそのアドレスを保持しているgotテーブルが出てくる
+gef➤  search-pattern 0x7ffff7e4f420
+[+] Searching '\x20\xf4\xe4\xf7\xff\x7f' in memory
+[+] In '/mnt/c/Users/sagit/my_proj/pwn/dream_heaps'(0x602000-0x603000), permission=rw-
+  0x602020 - 0x602038  →   "\x20\xf4\xe4\xf7\xff\x7f[...]"
+
+gef➤  search-pattern 0x602020
+[+] Searching '\x20\x20\x60' in memory
+[+] In '/mnt/c/Users/sagit/my_proj/pwn/dream_heaps'(0x400000-0x401000), permission=r-x
+  0x400538 - 0x40053b  →   "  `"
+
+0x400650 puts@plt gotを呼び出す
+0x602020 puts@got putsのアドレスを保持しているテーブル(0x602020)からputsを呼び出す
+
+objdump -R 
