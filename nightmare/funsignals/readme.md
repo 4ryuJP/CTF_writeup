@@ -46,3 +46,10 @@ struct sigcontext {
 
 SigreturnFrame()を使って簡単に組むことができる.
 関数呼び出しの前にcontext.archでアーキタイプを指定すること.アーキタイプはELF()で得られる情報(?).
+
+
+# 参考
+・システムコール一覧
+https://www.mztn.org/lxasm64/x86_x64_table.html
+・SROPの詳細
+https://inaz2.hatenablog.com/entry/2014/07/30/021123
