@@ -2,7 +2,6 @@
 """
 このスクリプトはJor(#7505)さんのwriteupを参考にしています
 Thanks Jor for the writeup.
-あとtry exceptがうまく動かないのでしばらく放置.
 """
 from pwn import *
 import warnings
@@ -45,9 +44,10 @@ while '}' not in flag :
         """
         target.sendline(b"AAAAAA" + payload)
         
-        #この部分がなぜかうまく動かない,全部tryを実行してしまう
         try:
-            target.recv(timeout=1)
+            target.recv(timeout=0.5)
+            target.recv(timeout=0.5)
+            target.recv(timeout=0.5)
             flag += c
             index += 1
             print("Found:",flag)
