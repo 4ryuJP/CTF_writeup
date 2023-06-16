@@ -164,6 +164,6 @@ Start              End                Offset             Perm Path
 0x007ffd909f3000 0x007ffd909f7000 0x00000000000000 r-- [vvar]
 0x007ffd909f7000 0x007ffd909f8000 0x00000000000000 r-x [vdso]
 ```
-0x7f4f874a8768 - 0x7f4f874a8788に格納されており、これはちょうどlibcの真上である。つまりmmapで確保した領域がちょうどこの辺りに来れば、writeとreadのバグを利用してカナリアをリークできる。create_noteを何度か実行すると、ちょうど15回目の時にTLSの真上に確保される。これを利用してカナリアをリークする。これでROPの準備が整った。
+0x7f4f874a8768 - 0x7f4f874a8788 (この領域に関しては以下 [参考](https://www.slideshare.net/codeblue_jp/master-canary-forging-by-code-blue-2015) )に格納されており、これはちょうどlibcの真上である。つまりmmapで確保した領域がちょうどこの辺りに来れば、writeとreadのバグを利用してカナリアをリークできる。create_noteを何度か実行すると、ちょうど15回目の時にTLSの真上に確保される。これを利用してカナリアをリークする。これでROPの準備が整った。
 
 なお、main関数のreturn前にseccompでopen、mmap、writeのシステムコールのみに制限されているのでシェルは取れない。ROPについてはsolverを参照してほしい。
