@@ -1,4 +1,4 @@
-このwriteupはこちら[https://hackmd.io/@yqroo/ictf2023#Form]を参考にしました。
+このwriteupは[こちら](https://hackmd.io/@yqroo/ictf2023#Form) を参考にしました。
 
 ```
 $ file vuln
@@ -88,6 +88,8 @@ gef➤  search-pattern flag{
 ## Tips
 ここで自分用におさらいとして書くが、format_stringは32bitと64bitは表示される順番が異なる(正確に言うと呼び出し規約に依るかもしれない)。
 例えば%x.%x.%x.%x.%xの場合
+```
 ・32bit(cdecl)    各引数に対応したスタックの中身が表示される
 ・64bit(fastcall) 各引数に対応したレジスタが表示された後、スタックの中身
+```
 
