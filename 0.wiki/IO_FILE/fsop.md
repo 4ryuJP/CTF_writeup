@@ -22,22 +22,22 @@ _IO_FILEのマクロの存在には留意しておきたい。#ifdef _IO_USE_OLD
 ```
 struct _IO_FILE
 {
-    int _flags;	               /* High-order word is _IO_MAGIC; rest is flags. */
+    int _flags;	                /* High-order word is _IO_MAGIC; rest is flags. */
 
     /* The following pointers correspond to the C++ streambuf protocol. */
-    char *_IO_read_ptr;	       /* Current read pointer */
-    char *_IO_read_end;	       /* End of get area. */
-    char *_IO_read_base;	     /* Start of putback+get area. */
-    char *_IO_write_base;	     /* Start of put area. */
-    char *_IO_write_ptr;	     /* Current put pointer. */
-    char *_IO_write_end;	     /* End of put area. */
-    char *_IO_buf_base;	       /* Start of reserve area. */
-    char *_IO_buf_end;	       /* End of reserve area. */
+    char *_IO_read_ptr;	        /* Current read pointer */
+    char *_IO_read_end;	        /* End of get area. */
+    char *_IO_read_base;        /* Start of putback+get area. */
+    char *_IO_write_base;　     /* Start of put area. */
+    char *_IO_write_ptr;	/* Current put pointer. */
+    char *_IO_write_end;	/* End of put area. */
+    char *_IO_buf_base;	        /* Start of reserve area. */
+    char *_IO_buf_end;	        /* End of reserve area. */
 
     /* The following fields are used to support backing up and undo. */
-    char *_IO_save_base;       /* Pointer to start of non-current get area. */
-    char *_IO_backup_base;     /* Pointer to first valid character of backup area */
-    char *_IO_save_end;        /* Pointer to end of non-current get area. */
+    char *_IO_save_base;        /* Pointer to start of non-current get area. */
+    char *_IO_backup_base;      /* Pointer to first valid character of backup area */
+    char *_IO_save_end;         /* Pointer to end of non-current get area. */
 
     struct _IO_marker *_markers;
 
@@ -78,9 +78,9 @@ struct _IO_FILE_complete
 ```
 
 ### fopen internal
-fopenの返り値であるファイル構造体の大きさは0x1e0となっており、_IO_FILE以外の何かがあるのは明らかだ。そこでfopenの内部も覗いてみる。
+heapのサイズを調べてみると0x1e0であり、FILE構造体だけでなく別に何か定義されているらしい。fopenを覗いてみよう。
 
-実はstdio.hに定義されているfopenはマクロであり、内部的には_IO_new_fopenを呼び出しているに過ぎない。さらに言えばこの_IO_new_fopenもラップ関数でしかなく、本体は_fopen_internalとなる。
+実はstdio.hに定義されているfopenはマクロであり、内部的には_IO_new_fopenを呼び出しているに過ぎない。さらに言えばこの_IO_new_fopenもラップ関数でしかなく、本体は_fopen_internalとなる。internalのmallocを見てみると、確保されているサイズは_IO_FILEではなく、struct _IO_wide_dataを合わせたlocked_FILE構造体のサイズになっている。
 
 ```
 stdio.h 184行目
@@ -123,7 +123,7 @@ __fopen_internal (const char *filename, const char *mode, int is32)
     return NULL;
 }
 ```
-mallocを見てみると、確保されているサイズは_IO_FILEではなく、struct _IO_wide_dataを合わせたlocked_FILE構造体のサイズになっている。
+さらにlocked_FILE構造体も見てみる。
 ```
 struct locked_FILE
 {
@@ -166,7 +166,7 @@ struct _IO_wide_data
     const struct _IO_jump_t *_wide_vtable;
 };
 ```
-IO_wide_dataは_IO_no_init内で初期化が行われている。差し当たってFSOPで重要なのは_IO_FILEのみであり、この辺りは気にする必要はなさそう。
+差し当たってFSOPで重要なのは_IO_FILEのみであり、この辺りは気にする必要はなさそう。
 
 
 ## what's _IO_FILE
